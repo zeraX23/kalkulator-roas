@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ROAS & Profit Calculator Pro</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Kalkulator ROAS dan Profit E-Commerce Profesional dengan PWA Support">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Inline Web App Manifest (untuk PWA) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+        %22name%22: %22ROAS Profit Pro%22,
+        %22short_name%22: %22ROAS Pro%22,
+        %22start_url%22: %22./index.html%22,
+        %22display%22: %22standalone%22,
+        %22background_color%22: %22%230f172a%22,
+        %22theme_color%22: %22%230f172a%22,
+        %22icons%22: [
+            {
+                %22src%22: %22data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27110%27 fill=%27%230f172a%27/><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27260%27>📈</text></svg>%22,
+                %22sizes%22: %22512x512%22,
+                %22type%22: %22image/svg+xml%22
+            }
+        ]
+    }">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02); 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15); 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- Top Navigation / Header -->
+    <header class="max-w-6xl w-full mx-auto flex justify-between items-center py-3 mb-2 border-b border-slate-800">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-xl shadow-lg shadow-blue-500/20">
+                📈
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">ROAS & Profit Pro</h1>
+                <p class="text-[11px] text-slate-400">E-Commerce Financial Intelligence Engine</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <!-- Tombol Install PWA (Hidden by default, muncul jika memenuhi syarat install) -->
+            <button id="btnInstall" style="display: none;" onclick="installPWA()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all shadow-md shadow-blue-600/30 flex items-center gap-1.5">
+                <span>📲</span> Instal App
+            </button>
+            <button onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition-all border border-slate-700">
+                Reset
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow items-start">
+        
+        <!-- Input Form Section (7 Kolom) -->
+        <section class="lg:col-span-7 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5">
+            <form id="calculatorForm" class="space-y-5" onsubmit="return false;">
+                
+                <!-- Grup 1: Penjualan & Produk -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> 1. Parameter Produk & Penjualan
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Harga Jual per Produk</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-500">Rp</span>
+                                <input type="text" id="hargaJual" class="currency-input w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold transition-all" placeholder="0" inputmode="numeric">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Modal / HPP per Produk</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-500">Rp</span>
+                                <input type="text" id="hpp" class="currency-input w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold transition-all" placeholder="0" inputmode="numeric">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Jumlah Terjual (Qty)</label>
+                            <input type="number" id="jumlahTerjual" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold transition-all" placeholder="1" min="1" value="1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Total Biaya Iklan (Ads)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-500">Rp</span>
+                                <input type="text" id="biayaIklan" class="currency-input w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold transition-all" placeholder="0" inputmode="numeric">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grup 2: Potongan Persentase (%) -->
+                <div class="space-y-3 pt-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span> 2. Potongan Platform (%)
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-300 mb-1">Admin MP</label>
+                            <div class="relative">
+                                <input type="number" id="feeAdmin" class="calc-trigger w-full pl-3 pr-7 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-rose-500 text-sm font-semibold" value="10" step="0.1" min="0">
+                                <span class="absolute right-2.5 top-2 text-xs text-slate-500">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-300 mb-1">Affiliate</label>
+                            <div class="relative">
+                                <input type="number" id="feeAffiliate" class="calc-trigger w-full pl-3 pr-7 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-rose-500 text-sm font-semibold" value="10" step="0.1" min="0">
+                                <span class="absolute right-2.5 top-2 text-xs text-slate-500">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-300 mb-1">Pajak (PPh)</label>
+                            <div class="relative">
+                                <input type="number" id="feePajak" class="calc-trigger w-full pl-3 pr-7 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-rose-500 text-sm font-semibold" value="0.5" step="0.1" min="0">
+                                <span class="absolute right-2.5 top-2 text-xs text-slate-500">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-300 mb-1">Lainnya</label>
+                            <div class="relative">
+                                <input type="number" id="feeLainnya" class="calc-trigger w-full pl-3 pr-7 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-rose-500 text-sm font-semibold" value="0" step="0.1" min="0">
+                                <span class="absolute right-2.5 top-2 text-xs text-slate-500">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grup 3: Biaya Tetap -->
+                <div class="space-y-3 pt-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> 3. Biaya Tetap per Paket
+                    </h3>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Biaya Penanganan / Proses Pesanan</label>
+                        <div class="relative max-w-xs">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-500">Rp</span>
+                            <input type="text" id="biayaTetap" class="currency-input w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-amber-500 text-sm font-semibold" value="1.250" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Output / Analisis Section (5 Kolom) -->
+        <section class="lg:col-span-5 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl flex flex-col justify-between space-y-5">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h2 class="text-sm font-bold text-slate-200">Hasil Analisis Keuangan</h2>
+                    <span id="statusBadge" class="text-[10px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-bold tracking-wide">MENUNGGU DATA</span>
+                </div>
+
+                <!-- Insight Pintar -->
+                <div id="insightBox" class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5">
+                    <span id="insightIcon" class="text-base">💡</span>
+                    <div>
+                        <span id="insightText" class="font-medium">Masukkan harga jual dan HPP untuk melihat simulasi profit bersih secara real-time.</span>
+                    </div>
+                </div>
+
+                <!-- Rincian Metrik -->
+                <div class="space-y-2.5 text-xs text-slate-400">
+                    <div class="flex justify-between">
+                        <span>Total Omset (Kotor)</span>
+                        <span class="font-bold text-white text-sm" id="outOmsetKotor">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Total Potongan Marketplace</span>
+                        <span class="font-medium text-rose-400" id="outTotalSemuaPotongan">- Rp 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Uang Diterima (Net Saldo)</span>
+                        <span class="font-semibold text-emerald-400" id="outUangCair">Rp 0</span>
+                    </div>
+                    <div class="border-t border-slate-800 pt-2.5 space-y-1.5">
+                        <div class="flex justify-between">
+                            <span>Total Modal Produk (HPP)</span>
+                            <span class="text-amber-300" id="outTotalHpp">- Rp 0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Total Biaya Iklan</span>
+                            <span class="text-amber-300" id="outBiayaIklan">- Rp 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid ROAS & Margin -->
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 text-center">
+                            <p class="text-[10px] uppercase font-bold text-slate-500 mb-0.5">ROAS Iklan</p>
+                            <p class="text-lg font-bold text-white"><span id="outRoas">0.00</span><span class="text-xs font-normal text-slate-400 ml-0.5">x</span></p>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 text-center">
+                            <p class="text-[10px] uppercase font-bold text-slate-500 mb-0.5">Margin Net</p>
+                            <p class="text-lg font-bold text-white" id="outMargin">0.0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profit Akhir Card -->
+            <div id="profitCard" class="bg-slate-950 p-4.5 rounded-2xl border border-slate-800 transition-all">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Profit Bersih (Net Income)</p>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" id="outProfitBersih">Rp 0</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="outProfitPerPcs" class="text-xs text-slate-400 font-semibold block">Rp 0 / pcs</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl w-full mx-auto text-center py-4 mt-4 border-t border-slate-800/60 text-[11px] text-slate-500">
+        Professional PWA Calculator &bull; Install di HP untuk akses offline mandiri
+    </footer>
+
+    <!-- Service Worker & PWA Script Logic -->
+    <script>
+        // Registrasi Service Worker agar berfungsi sebagai PWA & Offline-ready
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+                    self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+                    self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            });
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btnInstall = document.getElementById('btnInstall');
+            if (btnInstall) btnInstall.style.display = 'flex';
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('btnInstall').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // --- Logika Kalkulator Keuangan ---
+        function formatRupiah(angka, prefix) {
+            if (!angka) return "";
+            let number_string = angka.toString().replace(/[^,\d]/g, ''),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+            return prefix === undefined ? rupiah : (rupiah ? rupiah : '');
+        }
+
+        function parseRupiah(rupiahString) {
+            if(!rupiahString) return 0;
+            let cleanString = rupiahString.toString().replace(/\./g, '').replace(/,/g, '.');
+            return parseFloat(cleanString) || 0;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Event Listeners Input
+        const currencyInputs = document.querySelectorAll('.currency-input');
+        currencyInputs.forEach(input => {
+            input.addEventListener('keyup', function(e) {
+                let cursorPosition = this.selectionStart;
+                let originalLength = this.value.length;
+                this.value = formatRupiah(this.value);
+                let newLength = this.value.length;
+                cursorPosition = cursorPosition + (newLength - originalLength);
+                this.setSelectionRange(cursorPosition, cursorPosition);
+                calculateAll();
+            });
+            input.addEventListener('blur', function() {
+                if(!this.value) this.value = "0";
+                calculateAll();
+            });
+        });
+
+        document.querySelectorAll('.calc-trigger, #jumlahTerjual').forEach(input => {
+            input.addEventListener('input', calculateAll);
+        });
+
+        function resetForm() {
+            document.getElementById('calculatorForm').reset();
+            document.getElementById('jumlahTerjual').value = "1";
+            document.getElementById('biayaTetap').value = "1.250";
+            document.getElementById('feeAdmin').value = "10";
+            document.getElementById('feeAffiliate').value = "10";
+            document.getElementById('feePajak').value = "0.5";
+            document.getElementById('feeLainnya').value = "0";
+            calculateAll();
+        }
+
+        function calculateAll() {
+            const hargaJual = parseRupiah(document.getElementById('hargaJual').value);
+            const hpp = parseRupiah(document.getElementById('hpp').value);
+            const jumlahTerjual = Math.max(1, parseInt(document.getElementById('jumlahTerjual').value) || 1);
+            const biayaIklan = parseRupiah(document.getElementById('biayaIklan').value);
+
+            const feeAdmin = parseFloat(document.getElementById('feeAdmin').value) || 0;
+            const feeAffiliate = parseFloat(document.getElementById('feeAffiliate').value) || 0;
+            const feePajak = parseFloat(document.getElementById('feePajak').value) || 0;
+            const feeLainnya = parseFloat(document.getElementById('feeLainnya').value) || 0;
+            const biayaTetapSatuan = parseRupiah(document.getElementById('biayaTetap').value);
+
+            const omsetKotor = hargaJual * jumlahTerjual;
+            const totalHpp = hpp * jumlahTerjual;
+
+            const totalPersen = feeAdmin + feeAffiliate + feePajak + feeLainnya;
+            const potPersenNominal = (totalPersen / 100) * omsetKotor;
+            const totalBiayaTetap = biayaTetapSatuan * jumlahTerjual;
+            const totalSemuaPotongan = potPersenNominal + totalBiayaTetap;
+
+            const uangCair = omsetKotor - totalSemuaPotongan;
+            const profitBersih = uangCair - totalHpp - biayaIklan;
+            const profitPerPcs = profitBersih / jumlahTerjual;
+
+            let roas = biayaIklan > 0 ? omsetKotor / biayaIklan : 0;
+            let margin = omsetKotor > 0 ? (profitBersih / omsetKotor) * 100 : 0;
+
+            // Update UI
+            document.getElementById('outOmsetKotor').innerText = formatCurrency(omsetKotor);
+            document.getElementById('outTotalSemuaPotongan').innerText = "- " + formatCurrency(totalSemuaPotongan);
+            document.getElementById('outUangCair').innerText = formatCurrency(uangCair);
+            document.getElementById('outTotalHpp').innerText = "- " + formatCurrency(totalHpp);
+            document.getElementById('outBiayaIklan').innerText = "- " + formatCurrency(biayaIklan);
+            document.getElementById('outRoas').innerText = roas.toFixed(2);
+            document.getElementById('outMargin').innerText = margin.toFixed(1) + "%";
+            document.getElementById('outProfitBersih').innerText = formatCurrency(profitBersih);
+            document.getElementById('outProfitPerPcs').innerText = formatCurrency(profitPerPcs) + " / pcs";
+
+            const statusBadge = document.getElementById('statusBadge');
+            const profitCard = document.getElementById('profitCard');
+            const insightText = document.getElementById('insightText');
+            const insightIcon = document.getElementById('insightIcon');
+
+            if (omsetKotor === 0) {
+                statusBadge.className = "text-[10px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-bold";
+                statusBadge.innerText = "MENUNGGU DATA";
+                profitCard.className = "bg-slate-950 p-4.5 rounded-2xl border border-slate-800";
+                insightIcon.innerText = "💡";
+                insightText.innerHTML = "Masukkan harga jual dan HPP untuk melihat simulasi profit bersih secara real-time.";
+            } else if (profitBersih > 0) {
+                statusBadge.className = "text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold border border-emerald-500/30";
+                statusBadge.innerText = "PROFIT AMAN";
+                profitCard.className = "bg-gradient-to-r from-emerald-950 to-slate-950 p-4.5 rounded-2xl border border-emerald-500/40 shadow-lg shadow-emerald-950/40";
+                insightIcon.innerText = "🚀";
+                insightText.innerHTML = `Bisnis sehat dengan margin bersih <b>${margin.toFixed(1)}%</b>. Pertahankan performa iklan!`;
+            } else if (profitBersih < 0) {
+                statusBadge.className = "text-[10px] px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 font-extrabold border border-rose-500/30";
+                statusBadge.innerText = "BONCOS (RUGI)";
+                profitCard.className = "bg-gradient-to-r from-rose-950 to-slate-950 p-4.5 rounded-2xl border border-rose-500/40 shadow-lg shadow-rose-950/40";
+                insightIcon.innerText = "⚠️";
+                insightText.innerHTML = `<b>Peringatan Boncos!</b> Potongan marketplace dan biaya iklan menggerus modal Anda. Naikkan harga jual.`;
+            } else {
+                statusBadge.className = "text-[10px] px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-extrabold border border-amber-500/30";
+                statusBadge.innerText = "BEP (BALIK MODAL)";
+                profitCard.className = "bg-gradient-to-r from-amber-950 to-slate-950 p-4.5 rounded-2xl border border-amber-500/40";
+                insightIcon.innerText = "⚖️";
+                insightText.innerHTML = "<b>Pas-pasan!</b> Penjualan ini menutupi seluruh modal dan biaya tanpa menyisakan profit bersih.";
+            }
+        }
+
+        calculateAll();
+    </script>
+</body>
+</html>
